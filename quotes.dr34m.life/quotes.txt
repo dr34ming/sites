@@ -1,0 +1,176 @@
+# quotes.dr34m.life — one quote per line. Lines starting with # are ignored.
+# Edit this file, deploy, done. The screen picks it up within ~10 minutes.
+#
+# SEED CONTENT — Jonathan's own 2025-01-21 list, standing in until he writes the real ones.
+# Replace freely. Nothing below is precious.
+#
+# Format:
+#   Blank lines and # lines are skipped.
+#   Optional attribution after a pipe:   quote text | who said it
+#   Lines shaped like  A = B + C  are typeset as equations, everything else as a mantra.
+
+# ── mantras ──────────────────────────────────────────────────────────
+# Source: 2025-01-21 "Inspirational Quote List", first 50, verbatim.
+So say we all.
+Keep moving forward.
+Be the light.
+Carpe diem.
+Just breathe.
+Rise and shine.
+Dream big.
+Stay curious.
+Find your fire.
+Never give up.
+Embrace the chaos.
+Seek the truth.
+Be here now.
+Shine your light.
+Choose joy.
+Chase your dreams.
+Stay strong.
+You are enough.
+Believe in yourself.
+Make it happen.
+Love conquers all.
+Keep it simple.
+Follow your heart.
+Create your reality.
+Trust the process.
+Be unstoppable.
+Live your truth.
+Enjoy the journey.
+Ignite your soul.
+Stay the course.
+Take the leap.
+Find your peace.
+You got this.
+Hold the vision.
+Embrace the journey.
+Love your life.
+Be bold.
+Conquer fear.
+Inspire greatness.
+Make waves.
+Stay focused.
+Dare to dream.
+Be kind.
+Fear is temporary.
+Own your story.
+Rise above.
+Keep the faith.
+Seize the moment.
+Embrace the unknown.
+Create your legacy.
+
+# ── equations ────────────────────────────────────────────────────────
+# Source: same conversation, the "COURAGE = FEAR + ..." thread, verbatim.
+Courage = Fear + Action
+Success = Failure + Persistence
+Strength = Struggle + Resilience
+Growth = Discomfort + Effort
+Progress = Mistakes + Learning
+Wisdom = Experience + Reflection
+Greatness = Vision + Dedication
+Victory = Pain + Endurance
+Confidence = Fear + Mastery
+Joy = Gratitude + Presence
+Leadership = Responsibility + Courage
+Happiness = Simplicity + Gratitude
+Creativity = Curiosity + Courage
+Freedom = Discipline + Focus
+Mastery = Practice + Patience
+Harmony = Balance + Acceptance
+Discovery = Curiosity + Exploration
+Success = Dreams + Hard Work
+Power = Knowledge + Action
+Hope = Belief + Patience
+Love = Trust + Vulnerability
+Resilience = Pain + Recovery
+Peace = Forgiveness + Understanding
+Determination = Desire + Discipline
+Purpose = Passion + Action
+Fulfillment = Effort + Gratitude
+Focus = Desire + Elimination
+Respect = Honesty + Compassion
+Kindness = Empathy + Action
+Passion = Curiosity + Dedication
+Change = Desire + Action
+Impact = Effort + Intention
+Success = Opportunity + Preparation
+Balance = Ambition + Contentment
+Strength = Adversity + Resolve
+Bravery = Fear + Action
+Courage = Doubt + Faith
+Innovation = Failure + Creativity
+Transformation = Risk + Effort
+Vision = Imagination + Belief
+Persistence = Desire + Grit
+Clarity = Focus + Simplicity
+Triumph = Pain + Perseverance
+Stability = Patience + Consistency
+Enlightenment = Curiosity + Open-Mindedness
+Freedom = Courage + Choice
+Success = Sweat + Sacrifice
+Beauty = Simplicity + Truth
+Adventure = Risk + Curiosity
+Ambition = Goals + Action
+Legacy = Vision + Impact
+
+# ── seth material / dolores cannon ───────────────────────────────────
+# Source: same conversation, third list, verbatim minus two exact dupes of the
+# first list ("Trust the process." / "Embrace the unknown.") — a repeat inside one
+# shuffle bag would show the same line twice per cycle.
+You create your reality.
+Thoughts shape existence.
+Energy follows focus.
+Belief drives manifestation.
+The present holds power.
+Time is an illusion.
+You are eternal.
+Trust your inner self.
+Growth is infinite.
+Your soul is limitless.
+Fear is self-created.
+Love transcends dimensions.
+All is connected.
+You are the creator.
+Explore with curiosity.
+Reality mirrors belief.
+Vibrations shape form.
+Death is transition.
+Lessons guide the soul.
+Life is multidimensional.
+Purpose unfolds naturally.
+Karma is self-chosen.
+Dreams open portals.
+Creation stems from desire.
+Truth lies within.
+Intent directs energy.
+You are infinite potential.
+Past lives shape lessons.
+Healing begins in thought.
+The soul is sovereign.
+Perception creates experience.
+Imagination bridges realities.
+Spirit transcends matter.
+Reality is malleable.
+Consciousness expands eternally.
+Duality fuels growth.
+Unity underpins diversity.
+All possibilities exist now.
+Suffering teaches wisdom.
+Free will is sacred.
+Fear blocks evolution.
+Inner peace attracts clarity.
+Change is constant.
+All answers are within.
+You are the universe.
+Trust your higher self.
+The soul seeks balance.
+Every choice matters.
+
+# ── borrowed ─────────────────────────────────────────────────────────
+# Source: 2025-08-13 "Neal Stephenson quotes". Long paragraphs from that list omitted.
+Gold is the corpse of value. | Neal Stephenson, The Confusion
+In the beginning was the word, and it was misunderstood. | Neal Stephenson, Anathem
+Information is the only thing that can be infinitely shared and duplicated without being diminished. | Neal Stephenson, Cryptonomicon

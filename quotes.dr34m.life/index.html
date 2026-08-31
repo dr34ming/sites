@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>quotes</title>
+<style>
+/* ------------------------------------------------------------------
+   quotes.dr34m.life — always-on kiosk. No CDN, no web fonts, no
+   external requests of any kind. The only network call this page ever
+   makes is to its own quotes.txt.
+
+   Two voices, chosen by the line itself: an imperative gets the
+   title-card treatment (uppercase, heavy, tight); a line shaped like
+   an equation gets the mono treatment with the operators recessed.
+   The corpus has both grammars, so the page reads which one it got.
+   ------------------------------------------------------------------ */
+
+:root{
+  --void:      #000000;   /* true black — OLED off-pixels, burn-in */
+  --bone:      #E8E2D4;   /* warm off-white; pure white blooms at 10ft */
+  --verdigris: #5B9C8A;   /* oxidized bronze — equation operators */
+  --ash:       #6B6558;   /* attribution, diagnostics */
+
+  --face-display: "Helvetica Neue", Helvetica, system-ui, "Segoe UI", Roboto, "DejaVu Sans", Arial, sans-serif;
+  --face-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+
+  --safe-w: 84vw;   /* JS owns these — see SAFE_W / SAFE_H */
+  --safe-h: 66vh;
+  --fade: 1600ms;
+  --lum: 1;               /* night dimming multiplier */
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html,body{
+  width:100%; height:100%;
+  background: var(--void);
+  overflow:hidden;
+  cursor:none;
+  user-select:none; -webkit-user-select:none;
+  touch-action:none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Burn-in orbit. Two nested layers on coprime periods trace a slow
+   Lissajous path — the composition never sits on the same pixels
+   twice within ~30 hours. Functional, not decorative: it stays on
+   even under prefers-reduced-motion. */
+#drift{ width:100%; height:100%; animation: driftX 397s ease-in-out infinite alternate; }
+#orbit{ width:100%; height:100%; animation: driftY 271s ease-in-out infinite alternate; }
+@keyframes driftX{ from{ transform: translateX(-19px); } to{ transform: translateX(19px); } }
+@keyframes driftY{ from{ transform: translateY(-15px); } to{ transform: translateY(15px); } }
+
+.stage{
+  position:relative; width:100%; height:100%;
+  opacity: var(--lum);
+  transition: opacity 45s linear;
+}
+
+.card{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap: 3vh;
+  padding: 0 calc((100vw - var(--safe-w)) / 2);
+  /* optical centre sits a touch above true centre at this scale */
+  padding-bottom: 2.4vh;
+  opacity:0;
+  transform: scale(.994);
+  filter: blur(3px);
+  transition: opacity var(--fade) cubic-bezier(.4,0,.2,1),
+              transform var(--fade) cubic-bezier(.4,0,.2,1),
+              filter   var(--fade) cubic-bezier(.4,0,.2,1);
+  will-change: opacity, transform, filter;
+}
+.card.on{ opacity:1; transform:none; filter:blur(0); }
+
+.quote{
+  max-width: var(--safe-w);
+  max-height: var(--safe-h);
+  text-align:center;
+  text-wrap: balance;
+  overflow-wrap: normal;
+  hyphens: none;
+  color: var(--bone);
+}
+
+/* imperative → title card */
+.quote.mantra{
+  font-family: var(--face-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: .94;
+}
+
+/* equation → typeset as one. A ledger, not a sentence: terms stack in
+   a left column, operators hang in a gutter to their left. Wrapping an
+   equation like prose leaves operators dangling at line ends, which is
+   how you can tell nobody looked at it. */
+.quote.equation{
+  font-family: var(--face-mono);
+  font-weight: 500;
+  line-height: 1.16;
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: .34em;
+  row-gap: .06em;
+  justify-content: center;
+  align-items: baseline;
+  text-align: left;
+}
+.quote.equation .op{
+  color: var(--verdigris);
+  font-size: .72em;
+  font-weight: 400;
+  text-align: right;
+}
+.quote.equation .term{ white-space: nowrap; }
+
+.attrib{
+  font-family: var(--face-mono);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  color: var(--ash);
+  text-align:center;
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+  max-width: var(--safe-w);
+}
+.attrib:empty{ display:none; }
+
+/* Diagnostics. Invisible from a couch, legible standing at the screen.
+   Silent failure is the thing this page must not do. */
+#alert{
+  position:fixed; right:16px; bottom:12px;
+  font-family: var(--face-mono); font-size:12px; letter-spacing:.09em;
+  text-transform: uppercase; color: var(--ash);
+  opacity:0; transition: opacity 2s linear; pointer-events:none;
+}
+#alert.show{ opacity:.8; }
+
+/* No corpus at all — say so plainly rather than invent something. */
+#empty{
+  position:fixed; inset:0; display:none;
+  flex-direction:column; align-items:center; justify-content:center; gap:.9em;
+  font-family: var(--face-mono); color: var(--ash);
+  text-transform: uppercase; letter-spacing:.16em;
+}
+#empty.show{ display:flex; }
+#empty .big{ font-size: 22px; color: #8C8577; }
+#empty .small{ font-size: 13px; }
+
+@media (prefers-reduced-motion: reduce){
+  :root{ --fade: 320ms; }
+  .card{ filter:none; transform:none; }
+}
+</style>
+</head>
+<body>
+<div id="drift"><div id="orbit">
+  <div class="stage">
+    <div class="card" id="cardA"><div class="quote"></div><div class="attrib"></div></div>
+    <div class="card" id="cardB"><div class="quote"></div><div class="attrib"></div></div>
+  </div>
+</div></div>
+
+<div id="empty">
+  <div class="big">quotes.txt not loaded</div>
+  <div class="small" id="emptyWhy">retrying every 30 seconds</div>
+</div>
+<div id="alert"></div>
+
+<script>
+(() => {
+'use strict';
+
+// ---- knobs -----------------------------------------------------------
+const P = new URLSearchParams(location.search);
+const num = (k, d) => { const v = parseFloat(P.get(k)); return Number.isFinite(v) ? v : d; };
+
+const SRC        = sanitizeSrc(P.get('src')) || 'quotes.txt';
+const DWELL_MS   = Math.max(3, num('dwell', 30)) * 1000;   // ?dwell=45
+const POLL_MS    = Math.max(1, num('refresh', 10)) * 60000; // ?refresh=10 (minutes)
+const RELOAD_MS  = num('reload', 4) * 3600000;              // ?reload=0 disables
+const DIM_OFF    = (P.get('dim') || '').toLowerCase() === 'off';
+const NIGHT_LUM  = Math.min(1, Math.max(0.05, num('dim', 0.34)));
+const STALE_MS   = 30 * 60000;
+const SAFE_W     = 0.84, SAFE_H = 0.66;   // fraction of the viewport the type may fill
+const CACHE_KEY  = 'quotes.corpus.v1';
+
+function sanitizeSrc(s){
+  if (!s) return null;
+  if (s.includes(':') || s.startsWith('//')) return null; // same-origin relative only
+  return s;
+}
+
+// ---- corpus ----------------------------------------------------------
+// The file is the source of truth. Comments (#) and blanks are dropped;
+// an optional attribution follows a pipe. Nothing is invented here — if
+// the fetch fails and nothing is cached, the screen says so.
+function parse(text){
+  return text.split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l && !l.startsWith('#'))
+    .map(l => {
+      const i = l.indexOf('|');
+      const body   = (i === -1 ? l : l.slice(0, i)).trim();
+      const attrib = (i === -1 ? '' : l.slice(i + 1)).trim();
+      return body ? { text: body, attrib } : null;
+    })
+    .filter(Boolean);
+}
+
+let corpus = [];
+let corpusKey = '';
+let bag = [];
+let current = null;
+let history = [];
+let lastGood = Date.now();   // staleness is measured from boot, not from first success
+let lastAdvance = 0;
+let timer = null;
+let retry = null;
+let front = 'A';
+
+const els = {
+  A: { card: document.getElementById('cardA') },
+  B: { card: document.getElementById('cardB') },
+  alert: document.getElementById('alert'),
+  empty: document.getElementById('empty'),
+  emptyWhy: document.getElementById('emptyWhy')
+};
+for (const k of ['A','B']) {
+  els[k].quote  = els[k].card.querySelector('.quote');
+  els[k].attrib = els[k].card.querySelector('.attrib');
+}
+
+// ---- rendering -------------------------------------------------------
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isEquation = t => /\s=\s/.test(t);
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+
+// A = B + C becomes three ledger rows, operators in their own gutter.
+function ledger(t){
+  const parts = t.split(/\s([=+\u2212\u00d7\u00f7])\s/);
+  let html = '<span class="op"></span><span class="term">' + esc(parts[0]) + '</span>';
+  for (let i = 1; i < parts.length; i += 2){
+    html += '<span class="op">' + esc(parts[i]) + '</span>' +
+            '<span class="term">' + esc(parts[i + 1] || '') + '</span>';
+  }
+  return html;
+}
+
+// Optical fit: binary-search the size that fills the safe box, and let
+// tracking open up as the size comes down. A fixed font-size here is
+// the difference between designed and templated.
+function applySize(q, px, eq){
+  q.style.fontSize = px + 'px';
+  const t = clamp01((px - 48) / (320 - 48));
+  q.style.letterSpacing = (eq ? lerp(0.020, -0.010, t) : lerp(0.015, -0.028, t)).toFixed(4) + 'em';
+}
+
+function fit(q, eq){
+  const safeW = window.innerWidth  * SAFE_W;
+  const safeH = window.innerHeight * SAFE_H;
+  const hi0 = Math.min(window.innerHeight * 0.46, window.innerWidth * 0.52);
+  const fits = () => q.scrollHeight <= safeH + 0.5 && q.scrollWidth <= safeW + 0.5;
+
+  const search = () => {
+    let lo = 16, hi = hi0, best = lo;
+    for (let i = 0; i < 15; i++){
+      const mid = (lo + hi) / 2;
+      applySize(q, mid, eq);
+      if (fits()) { best = mid; lo = mid; } else { hi = mid; }
+    }
+    applySize(q, best, eq);
+    return best;
+  };
+
+  // Tight leading is right for a one- or two-line title card and wrong
+  // for a five-line block, so measure the line count and set it.
+  let lh = eq ? 1.16 : 0.92;
+  q.style.lineHeight = lh;
+  let best = search();
+  if (!eq && Math.round(q.scrollHeight / (best * lh)) >= 3){
+    q.style.lineHeight = lh = 1.03;
+    best = search();
+  }
+
+  // pathological single long word: break it rather than overflow silently
+  if (!fits()) { q.style.overflowWrap = 'anywhere'; best = search(); }
+  else q.style.overflowWrap = 'normal';
+  return best;
+}
+
+function paint(side, q){
+  const e = els[side];
+  const eq = isEquation(q.text);
+  e.quote.className = 'quote ' + (eq ? 'equation' : 'mantra');
+  e.quote.innerHTML = eq ? ledger(q.text) : esc(q.text);
+  const size = fit(e.quote, eq);
+  e.attrib.textContent = q.attrib ? '— ' + q.attrib : '';
+  e.attrib.style.fontSize = Math.round(Math.min(34, Math.max(18, size * 0.16))) + 'px';
+}
+
+function show(q){
+  const next = front === 'A' ? 'B' : 'A';
+  paint(next, q);
+  els[next].card.classList.add('on');
+  els[front].card.classList.remove('on');
+  front = next;
+  current = q;
+  lastAdvance = Date.now();
+}
+
+// ---- the bag ---------------------------------------------------------
+// Every quote shows once before any repeats; a reshuffle never lands on
+// the line that was just up.
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function refill(){
+  bag = shuffle(corpus.slice());
+  if (bag.length > 1 && current && bag[0].text === current.text){
+    const j = 1 + Math.floor(Math.random() * (bag.length - 1));
+    [bag[0], bag[j]] = [bag[j], bag[0]];
+  }
+}
+
+function advance(){
+  if (!corpus.length) return;
+  if (!bag.length) refill();
+  const q = bag.shift();
+  if (current) { history.push(current); if (history.length > 24) history.shift(); }
+  show(q);
+  schedule();
+}
+
+function back(){
+  if (!history.length) return;
+  const q = history.pop();
+  if (current) bag.unshift(current);
+  show(q);
+  schedule();
+}
+
+function schedule(){
+  clearTimeout(timer);
+  timer = setTimeout(advance, DWELL_MS);
+}
+
+// ---- loading ---------------------------------------------------------
+function adopt(text, fromCache){
+  const next = parse(text);
+  if (!next.length) return false;
+  const key = next.map(q => q.text + '|' + q.attrib).join('\n');
+  if (key === corpusKey) return true;          // unchanged, leave the bag alone
+  corpusKey = key;
+  corpus = next;
+  refill();
+  if (!fromCache) try { localStorage.setItem(CACHE_KEY, text); } catch (e) {}
+  els.empty.classList.remove('show');
+  if (!current) advance();
+  return true;
+}
+
+async function load(){
+  try {
+    const res = await fetch(SRC + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (!adopt(text, false)) throw new Error('no quotes parsed');
+    lastGood = Date.now();
+  } catch (e) {
+    if (!corpus.length){
+      // Nothing on screen at all — hammer it rather than wait out the poll.
+      els.emptyWhy.textContent = String(e.message || e).slice(0, 80) + ' · retrying';
+      els.empty.classList.add('show');
+      clearTimeout(retry);
+      retry = setTimeout(load, 30000);
+    }
+  }
+  health();
+}
+
+function boot(){
+  let cached = null;
+  try { cached = localStorage.getItem(CACHE_KEY); } catch (e) {}
+  if (cached) adopt(cached, true);             // paint instantly, then refresh
+  load();
+}
+
+// ---- night dimming ---------------------------------------------------
+function lumFor(d){
+  if (DIM_OFF) return 1;
+  const m = d.getHours() * 60 + d.getMinutes();
+  if (m >= 22 * 60)      return lerp(1, NIGHT_LUM, clamp01((m - 22 * 60) / 45));
+  if (m <  6 * 60 + 15)  return NIGHT_LUM;
+  if (m <  7 * 60)       return lerp(NIGHT_LUM, 1, clamp01((m - (6 * 60 + 15)) / 45));
+  return 1;
+}
+function applyLum(){
+  document.documentElement.style.setProperty('--lum', lumFor(new Date()).toFixed(3));
+}
+
+// ---- health ----------------------------------------------------------
+// A screen frozen on one quote for a week must not be possible, and a
+// corpus that stopped updating must be visible to anyone who walks up.
+function health(){
+  const stale = lastGood && (Date.now() - lastGood > STALE_MS);
+  if (stale){
+    const mins = Math.round((Date.now() - lastGood) / 60000);
+    const age = mins >= 60 ? Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm' : mins + 'm';
+    els.alert.textContent = 'quotes.txt unreachable · ' + age;
+    els.alert.classList.add('show');
+  } else {
+    els.alert.classList.remove('show');
+  }
+}
+
+function watchdog(){
+  if (corpus.length && lastAdvance && Date.now() - lastAdvance > DWELL_MS * 2.5){
+    advance();                                  // timer stalled — kick it
+  }
+  applyLum();
+  health();
+}
+
+// Periodic reload sheds any accumulated browser rot, but never reloads
+// into a network hole: prove the source is reachable first.
+async function scheduledReload(){
+  try {
+    const res = await fetch(SRC + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    await res.text();
+    location.reload();
+  } catch (e) {
+    setTimeout(scheduledReload, 10 * 60000);    // try again later, keep running
+  }
+}
+
+// ---- wiring ----------------------------------------------------------
+let resizeTimer = null;
+addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { if (current) paint(front, current); }, 200);
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  applyLum();
+  if (current) paint(front, current);
+  if (Date.now() - lastAdvance > DWELL_MS) advance(); else schedule();
+});
+
+addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'ArrowDown'){ e.preventDefault(); advance(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ e.preventDefault(); back(); }
+  else if (e.key === 'r' || e.key === 'R'){ load(); }
+});
+
+document.documentElement.style.setProperty('--safe-w', (SAFE_W * 100) + 'vw');
+document.documentElement.style.setProperty('--safe-h', (SAFE_H * 100) + 'vh');
+applyLum();
+boot();
+setInterval(load, POLL_MS);
+setInterval(watchdog, 15000);
+if (RELOAD_MS > 0){
+  // jitter so a wall of screens never reloads in unison
+  setTimeout(scheduledReload, RELOAD_MS + Math.random() * 20 * 60000);
+}
+})();
+</script>
+</body>
+</html>
